@@ -13,16 +13,14 @@ jobs:
   show-warning:
     # ジョブを実行する仮想環境の種類
     runs-on: ubuntu-latest
+    # strategy/matrix を使用してジョブを複数回実行する
+    strategy:
+      matrix:
+        # 'item' というキーに 'aaa' と 'bbb' を設定
+        item: [aaa, bbb]
     steps:
-      # ステップ1: ダミーファイルの作成
-      # 警告メッセージを紐付けるためのダミーファイルを作成します。
-      # このステップがないと、警告のファイルリンクが正しく機能しない場合があります。
-      - name: Create dummy app.js
-        run: echo "let x = 'hello'" > app.js
-
-      # ステップ2: 警告メッセージの出力
       # 指定されたコマンドを実行して警告メッセージを出力します。
       # この特殊な形式の出力は、GitHub Actionsによって解釈され、
       # ワークフロー実行結果の「Annotations」セクションに警告として表示されます。
       - name: Show Warning Message
-        run: echo "::warning file=app.js,line=1,col=5,endColumn=7,title=YOUR-TITLE::Missing semicolon"
+        run: echo "::warning title=Retried build for ${{ matrix.item }}::The first build of ${{ matrix.item }} was failed, and retried the build again.
