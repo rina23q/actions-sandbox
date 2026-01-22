@@ -9,9 +9,15 @@ permissions:
 jobs:
   block-fixup:
     name: Block fixup commits
-    runs-on: ubuntu-24.04
+    if: github.actor != 'github-actions[bot]' && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
 
     steps:
+      - name: Debug Actor
+        run: |
+          echo "The entity that created this PR is: ${{ github.actor }}"
+          echo "Is this a bot? ${{ github.actor == 'github-actions[bot]' }}"
+      
       - name: Checkout
         uses: actions/checkout@v4
 
