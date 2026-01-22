@@ -1,0 +1,44 @@
+name: Bot Simulator (Test Trigger)
+
+on:
+  workflow_dispatch: # Allows you to start this manually from the Actions tab
+
+jobs:
+  simulate-versioneer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create PR on new version
+        env:
+          # Using the standard token ensures the actor is 'github-actions[bot]'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_BRANCH: main
+          PR_BRANCH: test/bot-sim-branch-${{ github.run_id }}
+        run: |
+          set -x
+          
+          # Create a dummy change to ensure there is something to commit
+          echo "Simulated version update: ${{ github.run_id }}" > version.txt
+          
+          git config --global user.email "info@thin-edge.io"
+          git config --global user.name "Versioneer"
+          
+          git checkout -b "$PR_BRANCH"
+          git add version.txt
+          git commit -m "chore($TARGET_BRANCH): Update version/s"
+          git push --set-upstream origin "$PR_BRANCH"
+          
+          # Set default repo so GH CLI knows where to target
+          gh repo set-default ${{ github.repository }}
+          
+          # Create the PR
+          gh pr create \
+            --base "$TARGET_BRANCH" \
+            --title "chore($TARGET_BRANCH): Update version/s" \
+            --body "Update version/s for the $TARGET_BRANCH branch (Simulated)"
